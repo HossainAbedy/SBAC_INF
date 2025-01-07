@@ -24,20 +24,12 @@ def register_user(data):
         return jsonify({"message": "Email is already registered"}), 400
     if User.query.filter_by(username=username).first():
         return jsonify({"message": "Username is already taken"}), 400
-
-    # Check if the role exists
-    # role = Role.query.filter_by(id=role_id).first()  # Query by id
-    # if not role:
-    #     return jsonify({"message": f"Role '{role_id}' not found"}), 404
     
     # Fetch the 'user' role from the roles table
     user_role = Role.query.filter_by(name="user").first()
 
     # Hash the password before storing it
     hashed_password = bcrypt.generate_password_hash(password)
-
-    # Create the new user
-    #new_user = User(username=username, email=email, password=hashed_password, role_id=role.id)
 
     # Create a new user and assign the default role (user)
     new_user = User(
@@ -72,7 +64,7 @@ def login_user(data):
     user = User.query.filter_by(email=email).first()
 
     # Check if the user exists and the password matches
-    if not user or not check_password_hash(user.password, password):
+    if not user or not bcrypt.check_password_hash(user.password, password):
         return jsonify({"message": "Invalid credentials"}), 401
 
     # Create an access token with the user's identity

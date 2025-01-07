@@ -6,6 +6,7 @@ function Dashboard() {
     const [users, setUsers] = useState([]);
     const [roles, setRoles] = useState([]);
     const [loggedInUserRole, setLoggedInUserRole] = useState(""); // Logged-in user's role
+    const [selectedRoles, setSelectedRoles] = useState({}); // Store selected roles for each user
     const navigate = useNavigate(); // Hook for navigation
 
     useEffect(() => {
@@ -71,6 +72,14 @@ function Dashboard() {
         });
     };
 
+    // Handle role selection change
+    const handleRoleChange = (userId, newRoleId) => {
+        setSelectedRoles(prevState => ({
+            ...prevState,
+            [userId]: newRoleId,
+        }));
+    };
+
     return (
         <div>
             {/* Add button to navigate to Profile */}
@@ -95,41 +104,46 @@ function Dashboard() {
                     </tr>
                 </thead>
                 <tbody>
-                    {users.map((user) => (
-                        <tr key={user.id}>
-                            <td>{user.id}</td>
-                            <td>{user.name}</td>
-                            <td>{user.email}</td>
-                            <td>
-                                <select
-                                    value={user.roleId}
-                                    onChange={(e) => updateUserRole(user.id, parseInt(e.target.value))}
-                                    disabled={loggedInUserRole !== "admin"} // Disable for non-admins
-                                    className="form-select"
-                                >
-                                    {roles.map((role) => (
-                                        <option key={role.id} value={role.id}>
-                                            {role.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </td>
-                            <td>
-                                {loggedInUserRole === "admin" ? (
-                                    <button
-                                        className="btn btn-primary"
-                                        onClick={() => updateUserRole(user.id, user.roleId)}
+                    {users.map((user) => {
+                        // Get selected role for the user (fallback to current role if not yet selected)
+                        const selectedRole = selectedRoles[user.id] || user.roleId;
+
+                        return (
+                            <tr key={user.id}>
+                                <td>{user.id}</td>
+                                <td>{user.name}</td>
+                                <td>{user.email}</td>
+                                <td>
+                                    <select
+                                        value={selectedRole}
+                                        onChange={(e) => handleRoleChange(user.id, parseInt(e.target.value))} // Handle role change
+                                        disabled={loggedInUserRole !== "admin"} // Disable for non-admins
+                                        className="form-select"
                                     >
-                                        Save Role
-                                    </button>
-                                ) : (
-                                    <button className="btn btn-secondary" disabled>
-                                        Admin Only
-                                    </button>
-                                )}
-                            </td>
-                        </tr>
-                    ))}
+                                        {roles.map((role) => (
+                                            <option key={role.id} value={role.id}>
+                                                {role.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </td>
+                                <td>
+                                    {loggedInUserRole === "admin" ? (
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={() => updateUserRole(user.id, selectedRole)} // Save the selected role
+                                        >
+                                            Save Role
+                                        </button>
+                                    ) : (
+                                        <button className="btn btn-secondary" disabled>
+                                            Admin Only
+                                        </button>
+                                    )}
+                                </td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>

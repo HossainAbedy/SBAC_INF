@@ -40,7 +40,7 @@ function Header(props) {
                             <Link className="nav-link active" to="/dashboard">Home</Link>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link" href="#">About</a>
+                            <Link className="nav-link active" to="/branch">Inventory</Link>
                         </li>
                     </ul>
                     {!logged ? (

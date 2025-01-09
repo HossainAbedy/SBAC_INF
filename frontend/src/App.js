@@ -8,6 +8,15 @@ import Register from './components/Register'; // Import the Register component
 import useToken from './components/useToken';
 import Dashboard from "./components/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
+import BranchList from "./components/inventory/BranchList";
+import BranchDetails from "./components/inventory/BranchDetails";
+import BranchForm from "./components/inventory/BranchForm";
+import DeviceList from "./components/inventory/DeviceList";
+import DeviceDetails from "./components/inventory/DeviceDetails";
+import DeviceForm from "./components/inventory/DeviceForm";
+import BranchUserList from "./components/inventory/BranchUserList";
+import BranchUserDetails from "./components/inventory/BranchUserDetails";
+import BranchUserForm from "./components/inventory/BranchUserForm";
 
 function App() {
     const { token, removeToken, setToken } = useToken();
@@ -24,6 +33,18 @@ function App() {
                         <Route path="/profile" element={<Profile token={token} setToken={setToken} />} />
                         <Route path="/register" element={<Register />} /> {/* Add the route for /register */}
                         <Route path="/dashboard" element={<Dashboard />} /> {/* Add the route for /dashboard */}
+                        <Route path="/branch" element={<BranchList />} />
+                        <Route path="/branch/:id" element={<BranchDetails />} />
+                        <Route path="/add-branch" element={<BranchForm />} />
+                        <Route path="/edit-branch/:id" element={<BranchForm />} />
+                        <Route path="/device" element={<DeviceList />} />
+                        <Route path="/device/:id" element={<DeviceDetails />} />
+                        <Route path="/add-device" element={<DeviceForm />} />
+                        <Route path="/edit-device/:id" element={<DeviceForm />} />
+                        <Route path="/branch_user" element={<BranchUserList />} />
+                        <Route path="/branch_user/:id" element={<BranchUserDetails />} />
+                        <Route path="/add-branch_user" element={<BranchUserForm />} />
+                        <Route path="/edit-branch_user/:id" element={<BranchUserForm />} />
                         <Route 
                             path="/" 
                             element={

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
@@ -17,9 +17,15 @@ import DeviceForm from "./components/inventory/DeviceForm";
 import BranchUserList from "./components/inventory/BranchUserList";
 import BranchUserDetails from "./components/inventory/BranchUserDetails";
 import BranchUserForm from "./components/inventory/BranchUserForm";
+import NetDash from "./components/netdash/NetDash";
+import DeviceStatus from "./components/netdash/DeviceStatus";
+import BandwidthUsage from "./components/netdash/BandwidthUsage";
+import DeviceReport from "./components/netdash/DeviceReport";
+import useSocket from "./components/netdash/useSocket";
 
 function App() {
     const { token, removeToken, setToken } = useToken();
+    const [deviceId, setDeviceId] = useState(1);
 
     return (
         <div className="vh-100 gradient-custom">
@@ -45,6 +51,11 @@ function App() {
                         <Route path="/branch_user/:id" element={<BranchUserDetails />} />
                         <Route path="/add-branch_user" element={<BranchUserForm />} />
                         <Route path="/edit-branch_user/:id" element={<BranchUserForm />} />
+                        <Route path="/netdash" element={<NetDash />} />
+                        <Route path="/device-status" element={<DeviceStatus />} deviceId={deviceId}/>
+                        <Route path="/bandwidth-usage" element={<BandwidthUsage />} deviceId={deviceId}/>
+                        <Route path="/device-report" element={<DeviceReport />} deviceId={deviceId}/>
+                        <Route path="/use-socket" element={<useSocket />} deviceId={deviceId}/>                       
                         <Route 
                             path="/" 
                             element={

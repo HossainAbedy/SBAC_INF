@@ -42,6 +42,9 @@ function Header(props) {
                         <li className="nav-item">
                             <Link className="nav-link active" to="/branch">Inventory</Link>
                         </li>
+                        <li className="nav-item">
+                            <Link className="nav-link active" to="/netdash">NetDash</Link>
+                        </li>
                     </ul>
                     {!logged ? (
                         <button 

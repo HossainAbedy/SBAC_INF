@@ -5,6 +5,9 @@ from app.routes.profile_routes import profile_routes
 from app.routes.inventory_routes.branch_routes import branch_routes
 from app.routes.inventory_routes.device_routes import device_routes
 from app.routes.inventory_routes.branch_user_routes import branch_user_routes
+from app.routes.inventory_routes.netdevice_routes import netdevice_routes
+from app.routes.inventory_routes.monitoring_routes import monitoring_routes
+from app.routes.inventory_routes.report_routes import report_routes
 
 def register_routes(app):
     """Register all blueprints to the app."""
@@ -15,3 +18,6 @@ def register_routes(app):
     app.register_blueprint(branch_routes)
     app.register_blueprint(device_routes)
     app.register_blueprint(branch_user_routes)
+    app.register_blueprint(netdevice_routes)
+    app.register_blueprint(monitoring_routes)
+    app.register_blueprint(report_routes)

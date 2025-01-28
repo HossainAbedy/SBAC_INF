@@ -1,9 +1,9 @@
-from flask_cors import CORS
+# from flask_cors import CORS
 from app import create_app
 from app.routes import register_routes
 
 app = create_app()
-CORS(app, supports_credentials=True)
+# CORS(app, supports_credentials=True)
 
 # Register routes
 register_routes(app)

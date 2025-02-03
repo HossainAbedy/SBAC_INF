@@ -1,38 +1,50 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Grid, Card, CardActionArea, CardContent, Typography, CircularProgress } from "@mui/material";
 
-const InfraDashboard = () => {
-  const [categories, setCategories] = useState([]);
-  const user = useSelector((state) => state.auth.user);
+const InfraDashboard = ({ onSelectType }) => {
+  const [deviceSummary, setDeviceSummary] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/api/device-categories")
-      .then((res) => res.json())
-      .then((data) => setCategories(data))
-      .catch((err) => console.error("Error fetching categories:", err));
+    axios.get("http://localhost:5000/api/devices/summary")
+      .then((res) => setDeviceSummary(res.data))
+      .catch((err) => console.error("Error fetching device summary:", err));
   }, []);
 
+  const handleSelectType = (type) => {
+    onSelectType(type);
+    navigate("/devices");  // Navigate to DeviceList
+  };
+
+  if (deviceSummary.length === 0) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+        <CircularProgress />
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {categories.map((category) => (
-        <Link to={`/category/${category.id}`} key={category.id}>
-          <Card className="p-4 hover:shadow-lg transition">
-            <CardContent>
-              <h2 className="text-xl font-bold">{category.name}</h2>
-              <p className="text-sm text-gray-500">{category.deviceCount} Devices</p>
-            </CardContent>
+    <Grid container spacing={3} justifyContent="center" sx={{ mt: 3 }}>
+      {deviceSummary.map((device) => (
+        <Grid item key={device.type} xs={12} sm={6} md={4} lg={3}>
+          <Card sx={{ boxShadow: 3 }}>
+            <CardActionArea onClick={() => handleSelectType(device.type)}>
+              <CardContent sx={{ textAlign: "center" }}>
+                <Typography variant="h6" color="primary">
+                  {device.type}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {device.count} devices
+                </Typography>
+              </CardContent>
+            </CardActionArea>
           </Card>
-        </Link>
+        </Grid>
       ))}
-      {user?.role === "admin" && (
-        <Link to="/admin">
-          <Button className="w-full">Manage Devices</Button>
-        </Link>
-      )}
-    </div>
+    </Grid>
   );
 };
 

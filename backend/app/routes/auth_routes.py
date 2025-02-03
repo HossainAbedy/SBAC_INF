@@ -19,19 +19,24 @@ def register():
     """
     data = request.get_json()
 
-    # Validate request data
     if not data:
         return jsonify({"message": "No data provided"}), 400
 
     print(f"Received registration data: {data}")
 
-    # Call the register_user function from the auth module
     try:
         response, status_code = register_user(data)
-        return response, status_code
+
+        # Ensure response contains user data
+        if status_code == 201 and isinstance(response, dict) and "user" in response:
+            return jsonify(response), 201
+        else:
+            return jsonify({"message": "User registered successfully", "user": None}), 201
+
     except Exception as e:
         print(f"Error during registration: {str(e)}")
         return jsonify({"message": "An error occurred during registration"}), 500
+
  
 @auth_routes.route('/logintoken', methods=["POST"])
 def create_token():

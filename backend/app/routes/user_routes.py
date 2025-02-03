@@ -46,3 +46,17 @@ def update_user_role(user_id):
     db.session.commit()
 
     return jsonify({"success": True, "message": "Role updated successfully"})
+
+@user_routes.route('/user/<int:userId>', methods=['DELETE'])
+@jwt_required()
+def delete_user(userId):
+    claims = get_jwt()  # Extract JWT claims
+    user_role = claims.get('role')  # Check the role from JWT claims
+
+    if user_role != 'admin':  # Only admins can add devices
+        return jsonify({"success": False, "message": "Only admins can delete user"}), 403
+
+    user = User.query.get_or_404(userId)
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({"message": "User deleted successfully"})

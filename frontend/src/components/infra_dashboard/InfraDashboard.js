@@ -10,6 +10,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import DevicesIcon from "@mui/icons-material/Devices";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import { getRandomColor } from "../utils/RandomColors"; // Import a function for random color generation
 
 // Define chart colors
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AF19FF"];
@@ -147,14 +148,14 @@ const InfraDashboard = ({ onSelectType }) => {
         ))}
       </Grid>
 
-      {/* Charts Section */}
+      {/* Charts Section (Device)*/ }
       <Grid container spacing={4} sx={{ mt: 4 }}>
         {/* Pie Chart: Devices by Type */}
         <Grid item xs={12} md={6}>
-          <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
+          <Typography variant="h6" sx={{ mb: 0, textAlign: "center" }}>
             Device Distribution by Type
           </Typography>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
                 data={filteredDeviceSummary}
@@ -176,18 +177,64 @@ const InfraDashboard = ({ onSelectType }) => {
           </ResponsiveContainer>
         </Grid>
 
-        {/* Bar Chart: Devices by Location */}
+        {/* Bar Chart: Devices by Type */}
         <Grid item xs={12} md={6}>
           <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
-            Devices by Location
+            Device Distribution by Location
           </Typography>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={400}>
+            <PieChart>
+              <Pie
+                data={filteredLocationSummary}
+                dataKey="count"
+                nameKey="location"
+                cx="50%"
+                cy="50%"
+                outerRadius={120}
+                fill="#8884d8"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(1)}%`}
+              >
+                {filteredLocationSummary.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={getRandomColor()} />
+                ))}
+              </Pie>
+              <Tooltip />
+              {/* <Legend /> */}
+            </PieChart>
+          </ResponsiveContainer>
+        </Grid>
+      </Grid>
+
+      {/* Charts Section (Location)*/ }
+      <Grid container spacing={4} sx={{ mt: 4 }}>
+        {/* Pie Chart: Devices by Location */}
+        <Grid item xs={12} md={6}>
+          {/* <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
+            Devices by Location
+          </Typography> */}
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={filteredDeviceSummary}>
+              <XAxis dataKey="type" />
+              <YAxis />
+              <Tooltip cursor={{ fill: "rgba(0,0,0,0.1)" }} />
+              <Legend />
+              <Bar dataKey="count" fill={getRandomColor()} barSize={40} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Grid>
+
+        {/* Bar Chart: Devices by Location */}
+        <Grid item xs={12} md={6}>
+          {/* <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
+            Devices by Location
+          </Typography> */}
+          <ResponsiveContainer width="100%" height={400}>
             <BarChart data={filteredLocationSummary}>
               <XAxis dataKey="location" />
               <YAxis />
               <Tooltip cursor={{ fill: "rgba(0,0,0,0.1)" }} />
               <Legend />
-              <Bar dataKey="count" fill="#8884d8" barSize={40} />
+              <Bar dataKey="count" fill={getRandomColor()} barSize={40} />
             </BarChart>
           </ResponsiveContainer>
         </Grid>

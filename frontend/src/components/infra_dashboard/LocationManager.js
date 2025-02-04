@@ -88,16 +88,16 @@ const LocationManager = () => {
         <h2 style={{ fontSize: "24px", fontWeight: "bold" }}>Location Management</h2>
   
         {/* <div style={{ marginBottom: "2px", display: "flex", justifyContent: "space-between", gap: "2px" }}> */}
-          <Button type="primary" onClick={() => setModalVisible(true)} style={{ backgroundColor: "#4CAF50" }}>
+          <Button onClick={() => setModalVisible(true)} style={{ marginLeft: 10, outline: "2px solid green" }}>
             Add Location
           </Button>
           <Button 
-            type="default" 
+            // type="primary" 
             onClick={() => navigate("/admin-dashboard")} 
-            style={{ marginLeft: 10 }} 
+            style={{ marginLeft: 10, outline: "2px solid blue" }} 
             // disabled={loggedInUserRole === "user"}
             >
-                Manage Users
+                Manage Devices
           </Button>
           <Input
             placeholder="Search by Location Name or Code"
@@ -123,20 +123,25 @@ const LocationManager = () => {
             render={(text, record) => (
               <>
                 <Button
-                  type="link"
                   onClick={() => {
                     setEditingLocation(record);
                     setModalVisible(true);
                     form.setFieldsValue(record);
                   }}
-                  style={{ marginRight: 10 }}
+                  style={{ 
+                    marginRight: 10,
+                    outline: "2px solid yellow" // Add a yellow outline
+                }} 
                 >
                   Edit
                 </Button>
                 <Button
                   danger
                   onClick={() => handleDelete(record.id)}
-                  style={{ marginRight: 10 }}
+                  style={{ 
+                    marginRight: 10,
+                    outline: "2px solid red" // Add a yellow outline
+                }} 
                 >
                   Delete
                 </Button>

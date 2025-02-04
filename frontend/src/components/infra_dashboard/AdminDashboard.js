@@ -2,37 +2,35 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Button, Table, Modal, Input, Select, Form } from "antd";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';  // Import Toastify
-import 'react-toastify/dist/ReactToastify.css';  // Import Toastify styles
-import { debounce } from "lodash";  // Debounce for search input
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { debounce } from "lodash";
+import { SearchOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
 const AdminDashboard = () => {
   const [devices, setDevices] = useState([]);
+  const [filteredDevices, setFilteredDevices] = useState([]);
   const [locations, setLocations] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingDevice, setEditingDevice] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [roles, setRoles] = useState([]);
   const [loggedInUserRole, setLoggedInUserRole] = useState("");
-  const [selectedRoles, setSelectedRoles] = useState({});
-  const [form] = Form.useForm();
-  const navigate = useNavigate();
-
   const [filters, setFilters] = useState({
     name: '',
     type: '',
     location: ''
   });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [form] = Form.useForm();
+  const navigate = useNavigate();
 
-  // Fetch users and roles
+  // Fetch users
   const fetchUsers = () => {
     axios.get("http://127.0.0.1:5000/users", {
       headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
     })
     .then(response => {
-      setUsers(response.data.users);
       setLoggedInUserRole(response.data.loggedInUserRole);
     })
     .catch(error => console.error("Error fetching users:", error));
@@ -40,19 +38,16 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchUsers();
-    axios.get("http://127.0.0.1:5000/roles")
-    .then(response => setRoles(response.data.roles))
-    .catch(error => console.error("Error fetching roles:", error));
-  }, []);
+    fetchLocations();
+    fetchDevices();
+  }, [filters]);  // Re-fetch devices whenever filters change
 
   // Fetch devices based on filters
   const fetchDevices = async () => {
     try {
-      console.log("Fetching devices with filters:", filters);  // Debug log for filters
       const res = await axios.get("http://localhost:5000/api/devices/summaries", {
         params: filters  // Apply filters to the API call
       });
-      console.log("Fetched devices:", res.data);  // Debug log for API response
       setDevices(res.data);
     } catch (error) {
       console.error("Error fetching devices:", error);
@@ -62,17 +57,14 @@ const AdminDashboard = () => {
   // Fetch locations
   const fetchLocations = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/locations");
+      const res = await axios.get("http://localhost:5000/api/locations", {
+        params: filters  // Apply filters to the API call
+      });
       setLocations(res.data);
     } catch (error) {
       console.error("Error fetching locations:", error);
     }
   };
-
-  useEffect(() => {
-    fetchLocations();
-    fetchDevices();  // Fetch devices when filters change
-  }, [filters]);  // Depend on the filters object
 
   // Handle Add/Edit Device
   const handleFormSubmit = async (values) => {
@@ -81,29 +73,21 @@ const AdminDashboard = () => {
       if (!token) {
         throw new Error("No token found. Please log in.");
       }
-
       const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` }
       };
-
       if (editingDevice) {
-        // Update an existing device
         await axios.put(`http://localhost:5000/api/device/${editingDevice.id}`, values, config);
-        toast.success("Device updated successfully!");  // Toastify success
+        toast.success("Device updated successfully!");
       } else {
-        // Create a new device
         await axios.post("http://localhost:5000/api/device", values, config);
-        toast.success("Device added successfully!");  // Toastify success
+        toast.success("Device added successfully!");
       }
-
       fetchDevices();
       setModalVisible(false);
       form.resetFields();
     } catch (error) {
-      console.error("Error saving device:", error);
-      toast.error("Error saving device!");  // Toastify error
+      toast.error("Error saving device!");
     }
   };
 
@@ -114,64 +98,85 @@ const AdminDashboard = () => {
       if (!token) {
         throw new Error("No token found. Please log in.");
       }
-
       const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` }
       };
-
       await axios.delete(`http://localhost:5000/api/device/${deviceId}`, config);
-      toast.success("Device deleted successfully!");  // Toastify success
+      toast.success("Device deleted successfully!");
       fetchDevices();
     } catch (error) {
-      console.error("Error deleting device:", error);
-      toast.error("Error deleting device!");  // Toastify error
+      toast.error("Error deleting device!");
     }
   };
 
-  // Filter Change Handler with Debounce
+  // Handle filter change
   const handleFilterChange = (value, key) => {
-    console.log(`Changing filter: ${key} to ${value}`);  // Debug log for filter changes
     setFilters(prevFilters => ({
       ...prevFilters,
-      [key]: value
+      [key]: key === "location" ? value : value // Store location as ID
     }));
   };
 
-  // Debounced Filter for Search Input (name)
-  const debouncedHandleFilterChange = debounce((value, key) => {
-    handleFilterChange(value, key);
-  }, 500);  // 500ms debounce delay
+  // Debounced search filter
+  const debouncedSearchTermChange = debounce((term) => {
+    setFilters((prev) => ({
+      ...prev,
+      name: term
+    }));
+  }, 500);
+
+  const handleSearchTermChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    debouncedSearchTermChange(value);  // Call debounced function
+  };
+
+  useEffect(() => {
+    setFilteredDevices(devices.filter(device => {
+      return (
+        device.name.toLowerCase().includes(filters.name.toLowerCase()) &&
+        device.type.toLowerCase().includes(filters.type.toLowerCase()) &&
+        (filters.location ? device.location.id === filters.location : true) // Compare using ID
+      );
+    }));
+  }, [filters, devices]);
+  
 
   return (
     <div>
       <h2 style={{ fontSize: "24px", fontWeight: "bold" }}>Device Management</h2>
       
-      {/* Disable buttons for users with the role 'user' */}
+      <div style={{ marginTop: 20, marginBottom: 20 }}>
       <Button 
         type="primary" 
         onClick={() => setModalVisible(true)} 
         disabled={loggedInUserRole === "user"}
+        style={{ backgroundColor: "#4CAF50" }}
       >
         Add Device
       </Button>
-
       <Button 
-        type="default" 
+        type="primary" 
         onClick={() => navigate("/location-manager")} 
         style={{ marginLeft: 10 }} 
-        disabled={loggedInUserRole === "user"}
+        // disabled={loggedInUserRole === "user"}
       >
-        Manage Locations
+                      Manage Location
       </Button>
 
-      {/* Device Filter */}
-      <div style={{ marginTop: 20, marginBottom: 20 }}>
-        <Input 
-          placeholder="Search by Name" 
-          value={filters.name} 
-          onChange={e => debouncedHandleFilterChange(e.target.value, "name")}  // Use debounced filter
+      {/* Search Inputs */}
+      <Input
+          placeholder="Search by anything"
+          value={searchTerm}
+          onChange={handleSearchTermChange}
+          style={{ width: 300, marginLeft: 10 }}
+          prefix={<SearchOutlined />}
+      />
+
+        <Input
+          placeholder="Search by Name"
+          value={filters.name}
+          onChange={e => handleSearchTermChange(e)}
           style={{ width: 200, marginRight: 10 }}
         />
         <Select 
@@ -186,18 +191,19 @@ const AdminDashboard = () => {
         </Select>
 
         <Select 
-          placeholder="Filter by Location" 
-          value={filters.location} 
-          onChange={value => handleFilterChange(value, "location")} 
-          style={{ width: 200 }}
+            placeholder="Filter by Location" 
+            value={filters.location} 
+            onChange={value => handleFilterChange(value, "location")} 
+            style={{ width: 200 }}
         >
-          {locations.map((loc) => (
-            <Option key={loc.id} value={loc.id}>{loc.name}</Option>
-          ))}
+            {locations.map((loc) => (
+                <Option key={loc.id} value={loc.id}>{loc.name}</Option> // Store ID instead of name
+            ))}
         </Select>
       </div>
 
-      <Table dataSource={devices} rowKey="id" style={{ marginTop: 20 }}>
+      {/* Device Table */}
+      <Table dataSource={filteredDevices} rowKey="id" style={{ marginTop: 20 }}>
         <Table.Column title="Name" dataIndex="name" key="name" />
         <Table.Column title="Type" dataIndex="type" key="type" />
         <Table.Column title="Location" dataIndex="location" key="location" />
@@ -206,22 +212,31 @@ const AdminDashboard = () => {
           key="actions"
           render={(text, record) => (
             <>
-              <Button 
-                onClick={() => {
-                  setEditingDevice(record);
-                  setModalVisible(true);
-                  form.setFieldsValue(record);
+              <Button
+                style={{ 
+                    marginRight: 10,
+                    // outline: "2px solid yellow", // Add a yellow outline
+                    backgroundColor: "#FFD700"
                 }}
-                disabled={loggedInUserRole === "user"} // Disable Edit button for 'user'
-              >
+                onClick={() => {
+                    setEditingDevice(record);
+                    setModalVisible(true);
+                    form.setFieldsValue(record);
+                }}
+                disabled={loggedInUserRole === "user"}
+                >
                 Edit
-              </Button>
-
-              <Button 
-                danger 
+                </Button>
+                <Button 
+                // danger
+                style={{ 
+                    marginRight: 10,
+                    // outline: "2px solid red", // Add a red outline
+                    backgroundColor: "#FF2400"
+                }} 
                 onClick={() => handleDelete(record.id)} 
-                disabled={loggedInUserRole === "user"} // Disable Delete button for 'user'
-              >
+                disabled={loggedInUserRole === "user"}
+                >
                 Delete
               </Button>
             </>
@@ -244,7 +259,6 @@ const AdminDashboard = () => {
           <Form.Item name="name" label="Device Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-
           <Form.Item name="type" label="Type" rules={[{ required: true }]}>
             <Select>
               {[...new Set(devices.map(device => device.type))].map((type, index) => (
@@ -252,7 +266,6 @@ const AdminDashboard = () => {
               ))}
             </Select>
           </Form.Item>
-
           <Form.Item name="location_id" label="Location" rules={[{ required: true }]}>
             <Select>
               {locations.map((loc) => (
@@ -260,22 +273,19 @@ const AdminDashboard = () => {
               ))}
             </Select>
           </Form.Item>
-
           <Form.Item name="oem" label="OEM (Manufacturer)" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-
           <Form.Item name="serial_number" label="Serial Number" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-
           <Form.Item name="firmware_version" label="Firmware Version">
             <Input />
           </Form.Item>
         </Form>
       </Modal>
 
-      <ToastContainer /> {/* Toast container for notifications */}
+      <ToastContainer />
     </div>
   );
 };

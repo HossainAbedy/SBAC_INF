@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { Container, TextField, Button, Typography, Checkbox, FormControlLabel, Box, Grid, Paper, Alert } from "@mui/material";
+import { ToastContainer, toast } from 'react-toastify';  // Import Toastify
+import 'react-toastify/dist/ReactToastify.css';  // Import the CSS for styling
 
 const Login = ({ setToken }) => {
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
@@ -22,12 +24,10 @@ const Login = ({ setToken }) => {
         email: loginForm.email,
         password: loginForm.password
       });
-
       setToken(response.data.access_token);
       localStorage.setItem("access_token", response.data.access_token);
       localStorage.setItem("email", loginForm.email);
-
-      alert("Successfully Logged In");
+      toast.success("Successfully Logged In!");  // Toast notification
       navigate("/infra");
     } catch (error) {
       if (error.response?.status === 401) {
@@ -93,6 +93,8 @@ const Login = ({ setToken }) => {
           </Grid>
         </Grid>
       </Paper>
+      {/* Toast container for showing toasts */}
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop />
     </Container>
   );
 };

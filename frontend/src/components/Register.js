@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';  // Import Toastify
+import 'react-toastify/dist/ReactToastify.css';  // Import the CSS for styling
 import { 
   Container, TextField, Button, Typography, Grid, Box, Card, CardContent, Alert 
 } from "@mui/material";
@@ -34,12 +36,16 @@ function Register() {
     try {
       const response = await axios.post("http://127.0.0.1:5000/register", registerForm);
       console.log(response);
-      alert("Registration Successful");
+      
+      // Display success message and redirect to login
+      toast.success("Registration Successful!");
       navigate("/login");
+      
     } catch (error) {
       if (error.response) {
         console.log(error.response);
         setError("Registration failed. Please check your details.");
+        toast.error("Registration failed. Please check your details.");
       }
     }
 
@@ -129,6 +135,8 @@ function Register() {
           </Card>
         </Grid>
       </Grid>
+      {/* Toast container for showing toasts */}
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop />
     </Container>
   );
 }

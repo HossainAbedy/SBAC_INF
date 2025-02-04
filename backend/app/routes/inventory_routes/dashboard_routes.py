@@ -28,6 +28,17 @@ def get_all_locations():
     # Return the result as JSON
     return jsonify(result)
 
+@dashboard_routes.route('/api/devices/by-location', methods=['GET'])
+def get_devices_by_location():
+    location_summary = db.session.query(
+        Location.name.label("location"),
+        db.func.count(Device.id).label("count")
+    ).join(Device, Device.location_id == Location.id) \
+     .group_by(Location.name) \
+     .all()
+
+    return jsonify([{ "location": loc, "count": count } for loc, count in location_summary])    
+
 @dashboard_routes.route('/api/devices/summaries', methods=['GET'])
 def get_device_summaries():
     summary = db.session.query(

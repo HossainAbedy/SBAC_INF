@@ -1,19 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import {
-  Grid,
-  Card,
-  CardActionArea,
-  CardContent,
-  Typography,
-  CircularProgress,
-  Container,
-  Breadcrumbs,
-  Link,
-  Box,
-  CardMedia,
-} from "@mui/material";
+import {Grid,Card,CardActionArea,CardContent,Typography,CircularProgress,Container,Breadcrumbs,Link,Box,CardMedia,} from "@mui/material";
 import { Pie, Bar } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from "chart.js";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
@@ -121,6 +109,7 @@ const DeviceList = ({ selectedType, onSelectDevice }) => {
                     transition: "0.3s",
                     "&:hover": { boxShadow: 4 },
                     maxWidth: 140,
+                    maxHeight: 130,
                     backgroundColor: getDynamicColor(device.id), // Dynamic color
                   }}
                 >

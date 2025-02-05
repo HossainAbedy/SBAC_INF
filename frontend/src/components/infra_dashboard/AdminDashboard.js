@@ -25,6 +25,22 @@ const AdminDashboard = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
+  useEffect(() => {
+        fetchUsers();
+        fetchLocations();
+        fetchDevices();
+    }, []);  // Run only once on mount
+
+  useEffect(() => {
+    setFilteredDevices(devices.filter(device => {
+        return (
+            device.name.toLowerCase().includes(filters.name.toLowerCase()) &&
+            device.type.toLowerCase().includes(filters.type.toLowerCase()) &&
+            (filters.location ? device.location === filters.location : true) 
+        );
+    }));
+   }, [filters, devices]);  // Only runs when filters or devices change
+
   // Fetch users
   const fetchUsers = () => {
     axios.get("http://127.0.0.1:5000/users", {
@@ -35,12 +51,6 @@ const AdminDashboard = () => {
     })
     .catch(error => console.error("Error fetching users:", error));
   };
-
-  useEffect(() => {
-    fetchUsers();
-    fetchLocations();
-    fetchDevices();
-  }, [filters]);  // Re-fetch devices whenever filters change
 
   // Fetch devices based on filters
   const fetchDevices = async () => {
@@ -131,17 +141,6 @@ const AdminDashboard = () => {
     debouncedSearchTermChange(value);  // Call debounced function
   };
 
-  useEffect(() => {
-    setFilteredDevices(devices.filter(device => {
-      return (
-        device.name.toLowerCase().includes(filters.name.toLowerCase()) &&
-        device.type.toLowerCase().includes(filters.type.toLowerCase()) &&
-        (filters.location ? device.location.id === filters.location : true) // Compare using ID
-      );
-    }));
-  }, [filters, devices]);
-  
-
   return (
     <div>
       <h2 style={{ fontSize: "24px", fontWeight: "bold" }}>Device Management</h2>
@@ -197,7 +196,7 @@ const AdminDashboard = () => {
             style={{ width: 200 }}
         >
             {locations.map((loc) => (
-                <Option key={loc.id} value={loc.id}>{loc.name}</Option> // Store ID instead of name
+                <Option key={loc.id} value={loc.name}>{loc.name}</Option> // Store ID instead of name
             ))}
         </Select>
       </div>
@@ -269,7 +268,7 @@ const AdminDashboard = () => {
           <Form.Item name="location_id" label="Location" rules={[{ required: true }]}>
             <Select>
               {locations.map((loc) => (
-                <Option key={loc.id} value={loc.id}>{loc.name}</Option>
+                <Option key={loc.id} value={loc.name}>{loc.name}</Option>
               ))}
             </Select>
           </Form.Item>

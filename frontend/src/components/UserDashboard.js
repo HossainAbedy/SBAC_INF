@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Button, Table, TableHead, TableRow, TableCell, TableBody, Select, MenuItem, TextField, FormControl, Typography, Box, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Button, Card, CardContent, Stack, Typography, Box, Dialog, DialogTitle, DialogContent, DialogActions, Select, MenuItem, TextField, FormControl, InputLabel } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { Add, Delete, Edit, Person, Save } from "@mui/icons-material";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function UserDashboard() {
     const [users, setUsers] = useState([]);
@@ -12,6 +16,13 @@ function UserDashboard() {
     const [open, setOpen] = useState(false);
     const navigate = useNavigate();
 
+    useEffect(() => {
+        fetchUsers();
+        axios.get("http://127.0.0.1:5000/roles")
+            .then(response => setRoles(response.data.roles))
+            .catch(error => toast.error("Error fetching roles"));
+    }, []);
+
     const fetchUsers = () => {
         axios.get("http://127.0.0.1:5000/users", {
             headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
@@ -20,18 +31,11 @@ function UserDashboard() {
             setUsers(response.data.users);
             setLoggedInUserRole(response.data.loggedInUserRole);
         })
-        .catch(error => console.error("Error fetching users:", error));
+        .catch(() => toast.error("Error fetching users"));
     };
 
-    useEffect(() => {
-        fetchUsers();
-        axios.get("http://127.0.0.1:5000/roles")
-        .then(response => setRoles(response.data.roles))
-        .catch(error => console.error("Error fetching roles:", error));
-    }, []);
-
     const handleRoleChange = (userId, newRoleId) => {
-        setSelectedRoles(prevState => ({ ...prevState, [userId]: newRoleId }));
+        setSelectedRoles(prev => ({ ...prev, [userId]: newRoleId }));
     };
 
     const updateUserRole = (userId, newRoleId) => {
@@ -39,10 +43,10 @@ function UserDashboard() {
             headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
         })
         .then(() => {
-            alert("Role updated successfully!");
+            toast.success("Role updated successfully!");
             setUsers(users.map(user => user.id === userId ? { ...user, roleId: newRoleId } : user));
         })
-        .catch(error => alert(error.response?.data?.message || "Error updating role"));
+        .catch(error => toast.error(error.response?.data?.message || "Error updating role"));
     };
 
     const handleDeleteUser = (userId) => {
@@ -50,10 +54,10 @@ function UserDashboard() {
             headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
         })
         .then(() => {
-            alert("User deleted successfully");
+            toast.success("User deleted successfully");
             setUsers(users.filter(user => user.id !== userId));
         })
-        .catch(error => alert("Error deleting user"));
+        .catch(() => toast.error("Error deleting user"));
     };
 
     const handleAddUser = () => {
@@ -61,81 +65,105 @@ function UserDashboard() {
             headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
         })
         .then(() => {
-            fetchUsers();  // Fetch updated list after adding a user
+            toast.success("User added successfully!");
+            fetchUsers();
             setOpen(false);
         })
-        .catch(error => {
-            console.error("Error adding user:", error);
-            alert("Error adding user");
-        });
+        .catch(() => toast.error("Error adding user"));
     };
+
+    const columns = [
+        { field: "id", headerName: "ID", width: 70 },
+        { field: "username", headerName: "Name", flex: 1 },
+        { field: "email", headerName: "Email", flex: 1 },
+        { 
+            field: "roleId", 
+            headerName: "Role", 
+            flex: 1,
+            renderCell: (params) => (
+                <FormControl fullWidth size="small" disabled={loggedInUserRole !== "admin"}>
+                    <Select 
+                        value={selectedRoles[params.row.id] || params.row.roleId} 
+                        onChange={e => handleRoleChange(params.row.id, parseInt(e.target.value))}
+                    >
+                        {roles.map(role => <MenuItem key={role.id} value={role.id}>{role.name}</MenuItem>)}
+                    </Select>
+                </FormControl>
+            )
+        },
+        {
+            field: "actions",
+            headerName: "Actions",
+            flex: 1,
+            renderCell: (params) => (
+                <Stack direction="row" spacing={1}>
+                    <Button 
+                        variant="contained" 
+                        color="primary" 
+                        size="small" 
+                        startIcon={<Save />} 
+                        onClick={() => updateUserRole(params.row.id, selectedRoles[params.row.id] || params.row.roleId)}
+                        disabled={loggedInUserRole !== "admin"}
+                    >
+                        Save
+                    </Button>
+                    <Button 
+                        variant="contained" 
+                        color="error" 
+                        size="small" 
+                        startIcon={<Delete />} 
+                        onClick={() => handleDeleteUser(params.row.id)}
+                        disabled={loggedInUserRole === "user"}
+                    >
+                        Delete
+                    </Button>
+                </Stack>
+            )
+        }
+    ];
 
     return (
         <Box sx={{ padding: 3 }}>
-            {/* Aligning Profile button to the right */}
-            <Box sx={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+
+            <Stack direction="row" justifyContent="space-between" alignItems="center" marginBottom={3}>
                 <Typography variant="h4">User Dashboard</Typography>
-                <Button variant="contained" color="info" onClick={() => navigate("/profile")}>Go to Profile</Button>
-            </Box>
+                <Button variant="contained" color="info" startIcon={<Person />} onClick={() => navigate("/profile")}>
+                    Go to Profile
+                </Button>
+            </Stack>
 
-            {/* Disable Add User button if logged-in role is "user" */}
-            <Button variant="contained" color="primary" onClick={() => setOpen(true)} disabled={loggedInUserRole === "user"}>
-                Add User
-            </Button>
+            <Card elevation={3} sx={{ padding: 3 }}>
+                <Stack direction="row" justifyContent="flex-end">
+                    <Button 
+                        variant="contained" 
+                        color="primary" 
+                        startIcon={<Add />} 
+                        onClick={() => setOpen(true)}
+                        disabled={loggedInUserRole === "user"}
+                    >
+                        Add User
+                    </Button>
+                </Stack>
 
-            <Table sx={{ marginTop: 2 }}>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>ID</TableCell>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Email</TableCell>
-                        <TableCell>Role</TableCell>
-                        <TableCell>Actions</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {users.map(user => (
-                        <TableRow key={user.id}>
-                            <TableCell>{user.id}</TableCell>
-                            <TableCell>{user.username}</TableCell>
-                            <TableCell>{user.email}</TableCell>
-                            <TableCell>
-                                <FormControl fullWidth disabled={loggedInUserRole !== "admin"}>
-                                    <Select value={selectedRoles[user.id] || user.roleId} onChange={e => handleRoleChange(user.id, parseInt(e.target.value))}>
-                                        {roles.map(role => <MenuItem key={role.id} value={role.id}>{role.name}</MenuItem>)}
-                                    </Select>
-                                </FormControl>
-                            </TableCell>
-                            <TableCell>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() => updateUserRole(user.id, selectedRoles[user.id] || user.roleId)}
-                                    disabled={loggedInUserRole !== "admin"}
-                                >
-                                    Save Role
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="error"
-                                    onClick={() => handleDeleteUser(user.id)}
-                                    disabled={loggedInUserRole === "user"}
-                                >
-                                    Delete
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                <Box sx={{ height: 400, marginTop: 2 }}>
+                    <DataGrid 
+                        rows={users} 
+                        columns={columns} 
+                        pageSize={5} 
+                        getRowId={(row) => row.id} 
+                        disableSelectionOnClick 
+                    />
+                </Box>
+            </Card>
 
             {/* Add User Dialog */}
             <Dialog open={open} onClose={() => setOpen(false)}>
                 <DialogTitle>Add New User</DialogTitle>
                 <DialogContent>
-                    <TextField label="Username" fullWidth value={newUser.username} onChange={e => setNewUser({ ...newUser, username: e.target.value })} />
-                    <TextField label="Email" fullWidth value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} />
-                    <TextField label="Password" fullWidth type="password" value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} />
+                    <TextField label="Username" fullWidth value={newUser.username} onChange={e => setNewUser({ ...newUser, username: e.target.value })} margin="dense" />
+                    <TextField label="Email" fullWidth value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} margin="dense" />
+                    <TextField label="Password" fullWidth type="password" value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} margin="dense" />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpen(false)}>Cancel</Button>

@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import {
-  Grid, Card, CardActionArea, CardContent, Typography, CircularProgress,
-  Breadcrumbs, Link, Select, MenuItem, FormControl, InputLabel
-} from "@mui/material";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+// import { Button, Table, Modal, Input, Select, Form } from "antd";
 import HomeIcon from "@mui/icons-material/Home";
 import DevicesIcon from "@mui/icons-material/Devices";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { getRandomColor } from "../utils/RandomColors"; // Import a function for random color generation
+import {
+  Grid, Card, CardActionArea, CardContent, FormControl, CircularProgress,
+  Breadcrumbs, Link, MenuItem
+} from "@mui/material";
+import { 
+  Box, Button, Table, TableHead, TableRow, TableCell, TableBody, 
+  Select, Typography, InputLabel 
+} from "@mui/material";
 
 // Define chart colors
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AF19FF"];
@@ -48,6 +53,10 @@ const InfraDashboard = ({ onSelectType }) => {
       selectedType ? deviceSummary.filter((d) => d.type === selectedType) : deviceSummary
     );
   };
+  // Filter Device data based on legend click
+  const displayedDeviceData = selectedDeviceType
+    ? filteredDeviceSummary.filter((entry) => entry.type === selectedDeviceType)
+    : filteredDeviceSummary;
 
   // Handle Location Filter
   const handleLocationChange = (event) => {
@@ -57,6 +66,10 @@ const InfraDashboard = ({ onSelectType }) => {
       selectedLoc ? locationSummary.filter((l) => l.location === selectedLoc) : locationSummary
     );
   };
+  // Filter Location data based on legend click
+  const displayedLocationData = selectedLocation
+    ? filteredLocationSummary.filter((entry) => entry.location === selectedLocation)
+    : filteredLocationSummary;
 
   const handleSelectType = (type) => {
     onSelectType(type);
@@ -92,11 +105,15 @@ const InfraDashboard = ({ onSelectType }) => {
       </Breadcrumbs>
 
       {/* Filters */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
+      <Grid container spacing={3} sx={{ mb: 3, alignItems: "center" }}>
         <Grid item xs={12} sm={6} md={4}>
-          <FormControl fullWidth>
-            <InputLabel>Filter by Device Type</InputLabel>
-            <Select value={selectedDeviceType} onChange={handleDeviceTypeChange}>
+          <FormControl fullWidth sx={{ bgcolor: "white", borderRadius: 2, boxShadow: 1 }}>
+            <InputLabel sx={{ fontSize: 14 }}>Filter by Device Type</InputLabel>
+            <Select
+              value={selectedDeviceType}
+              onChange={handleDeviceTypeChange}
+              sx={{ height: 45, fontSize: 14 }}
+            >
               <MenuItem value="">All</MenuItem>
               {deviceSummary.map((device) => (
                 <MenuItem key={device.type} value={device.type}>
@@ -106,10 +123,15 @@ const InfraDashboard = ({ onSelectType }) => {
             </Select>
           </FormControl>
         </Grid>
+
         <Grid item xs={12} sm={6} md={4}>
-          <FormControl fullWidth>
-            <InputLabel>Filter by Location</InputLabel>
-            <Select value={selectedLocation} onChange={handleLocationChange}>
+          <FormControl fullWidth sx={{ bgcolor: "white", borderRadius: 2, boxShadow: 1 }}>
+            <InputLabel sx={{ fontSize: 14 }}>Filter by Location</InputLabel>
+            <Select
+              value={selectedLocation}
+              onChange={handleLocationChange}
+              sx={{ height: 45, fontSize: 14 }}
+            >
               <MenuItem value="">All</MenuItem>
               {locationSummary.map((location) => (
                 <MenuItem key={location.location} value={location.location}>
@@ -120,6 +142,7 @@ const InfraDashboard = ({ onSelectType }) => {
           </FormControl>
         </Grid>
       </Grid>
+
 
       {/* Device Type Cards */}
       <Grid container spacing={3} justifyContent="center">
@@ -158,21 +181,28 @@ const InfraDashboard = ({ onSelectType }) => {
           <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
-                data={filteredDeviceSummary}
+                data={displayedDeviceData}
                 dataKey="count"
                 nameKey="type"
                 cx="50%"
                 cy="50%"
-                outerRadius={120}
+                outerRadius={100}
                 fill="#8884d8"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(1)}%`}
+                // label={({ name, count }) => `${name} ${(percent * 100).toFixed(1)}%`}
+                label={({ name, count }) => `${name} ${count}`}
               >
-                {filteredDeviceSummary.map((_, index) => (
+                {displayedDeviceData.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip />
-              <Legend />
+              <Legend
+                layout="vertical"
+                align="right"
+                verticalAlign="middle"
+                wrapperStyle={{ overflowY: "auto", maxHeight: "150px", marginLeft: "20px" }} // Add spacing
+                onClick={(e) => setSelectedDeviceType(e.value === selectedDeviceType ? null : e.value)} // Toggle selection
+              />
             </PieChart>
           </ResponsiveContainer>
         </Grid>
@@ -185,21 +215,30 @@ const InfraDashboard = ({ onSelectType }) => {
           <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
-                data={filteredLocationSummary}
+                data={displayedLocationData}
                 dataKey="count"
                 nameKey="location"
-                cx="50%"
+                cx="50%" // Shift left for better spacing
                 cy="50%"
-                outerRadius={120}
-                fill="#8884d8"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(1)}%`}
+                outerRadius={100} // Increase for better visibility
+                label={({ value, x, y }) => (
+                  <text x={x} y={y} textAnchor="middle" fontSize={16} fill={getRandomColor()}>
+                    {value}
+                  </text>
+                )}
               >
-                {filteredLocationSummary.map((_, index) => (
+                {displayedLocationData.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={getRandomColor()} />
                 ))}
               </Pie>
               <Tooltip />
-              {/* <Legend /> */}
+              <Legend
+                layout="vertical"
+                align="right"
+                verticalAlign="middle"
+                wrapperStyle={{ overflowY: "auto", maxHeight: "150px", marginLeft: "20px" }} // Add spacing
+                onClick={(e) => setSelectedLocation(e.value === selectedLocation ? null : e.value)} // Toggle selection
+              />
             </PieChart>
           </ResponsiveContainer>
         </Grid>
@@ -218,7 +257,11 @@ const InfraDashboard = ({ onSelectType }) => {
               <YAxis />
               <Tooltip cursor={{ fill: "rgba(0,0,0,0.1)" }} />
               <Legend />
-              <Bar dataKey="count" fill={getRandomColor()} barSize={40} />
+              <Bar dataKey="count" barSize={40}>
+                {filteredDeviceSummary.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={getRandomColor()} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </Grid>
@@ -234,7 +277,11 @@ const InfraDashboard = ({ onSelectType }) => {
               <YAxis />
               <Tooltip cursor={{ fill: "rgba(0,0,0,0.1)" }} />
               <Legend />
-              <Bar dataKey="count" fill={getRandomColor()} barSize={40} />
+              <Bar dataKey="count" barSize={40}>
+                {filteredLocationSummary.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={getRandomColor()} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </Grid>

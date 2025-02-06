@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, CardContent, Stack, Typography, Box, Dialog, DialogTitle, DialogContent, DialogActions, Select, MenuItem, TextField, FormControl, InputLabel } from '@mui/material';
+import { Button, Card, Stack, Typography, Box, Dialog, DialogTitle, DialogContent, DialogActions, Select, MenuItem, TextField, FormControl} from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import { Add, Delete, Edit, Person, Save } from "@mui/icons-material";
+import { Add, Delete, Person, Save } from "@mui/icons-material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -18,13 +18,13 @@ function UserDashboard() {
 
     useEffect(() => {
         fetchUsers();
-        axios.get("http://127.0.0.1:5000/roles")
+        axios.get("http://172.19.100.110:5000/roles")
             .then(response => setRoles(response.data.roles))
             .catch(error => toast.error("Error fetching roles"));
     }, []);
 
     const fetchUsers = () => {
-        axios.get("http://127.0.0.1:5000/users", {
+        axios.get("http://172.19.100.110:5000/users", {
             headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
         })
         .then(response => {
@@ -39,7 +39,7 @@ function UserDashboard() {
     };
 
     const updateUserRole = (userId, newRoleId) => {
-        axios.post(`http://127.0.0.1:5000/users/${userId}/updateRole`, { roleId: newRoleId }, {
+        axios.post(`http://172.19.100.110:5000/users/${userId}/updateRole`, { roleId: newRoleId }, {
             headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
         })
         .then(() => {
@@ -50,7 +50,7 @@ function UserDashboard() {
     };
 
     const handleDeleteUser = (userId) => {
-        axios.delete(`http://127.0.0.1:5000/user/${userId}`, {
+        axios.delete(`http://172.19.100.110:5000/user/${userId}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
         })
         .then(() => {
@@ -61,7 +61,7 @@ function UserDashboard() {
     };
 
     const handleAddUser = () => {
-        axios.post("http://127.0.0.1:5000/register", newUser, {
+        axios.post("http://172.19.100.110:5000/register", newUser, {
             headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
         })
         .then(() => {

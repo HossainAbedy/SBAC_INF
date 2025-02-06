@@ -2,19 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
-// import { Button, Table, Modal, Input, Select, Form } from "antd";
 import HomeIcon from "@mui/icons-material/Home";
 import DevicesIcon from "@mui/icons-material/Devices";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { getRandomColor } from "../utils/RandomColors"; // Import a function for random color generation
 import {
   Grid, Card, CardActionArea, CardContent, FormControl, CircularProgress,
-  Breadcrumbs, Link, MenuItem
-} from "@mui/material";
-import { 
-  Box, Button, Table, TableHead, TableRow, TableCell, TableBody, 
-  Select, Typography, InputLabel 
+  Breadcrumbs, Link, MenuItem,Select, Typography, InputLabel 
 } from "@mui/material";
 
 // Define chart colors
@@ -30,14 +24,14 @@ const InfraDashboard = ({ onSelectType }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/devices/summary")
+    axios.get("http://172.19.100.110:5000/api/devices/summary")
       .then((res) => {
         setDeviceSummary(res.data);
         setFilteredDeviceSummary(res.data);
       })
       .catch((err) => console.error("Error fetching device summary:", err));
 
-    axios.get("http://localhost:5000/api/devices/by-location")
+    axios.get("http://172.19.100.110:5000/api/devices/by-location")
       .then((res) => {
         setLocationSummary(res.data);
         setFilteredLocationSummary(res.data);
@@ -248,9 +242,6 @@ const InfraDashboard = ({ onSelectType }) => {
       <Grid container spacing={4} sx={{ mt: 4 }}>
         {/* Pie Chart: Devices by Location */}
         <Grid item xs={12} md={6}>
-          {/* <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
-            Devices by Location
-          </Typography> */}
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={filteredDeviceSummary}>
               <XAxis dataKey="type" />
@@ -268,9 +259,6 @@ const InfraDashboard = ({ onSelectType }) => {
 
         {/* Bar Chart: Devices by Location */}
         <Grid item xs={12} md={6}>
-          {/* <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
-            Devices by Location
-          </Typography> */}
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={filteredLocationSummary}>
               <XAxis dataKey="location" />

@@ -34,7 +34,7 @@ function Register() {
     }
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/register", registerForm);
+      const response = await axios.post("http://172.19.100.110:5000/register", registerForm);
       console.log(response);
       
       // Display success message and redirect to login

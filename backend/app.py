@@ -3,7 +3,6 @@ from app import create_app
 from app.routes import register_routes
 
 app = create_app()
-# CORS(app, supports_credentials=True)
 
 # Register routes
 register_routes(app)
@@ -15,7 +14,6 @@ register_routes(app)
 def hello_world():
     return "<p>Hello, World!</p>"
 
-
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="172.19.100.110", port=5000, debug=True)
+    

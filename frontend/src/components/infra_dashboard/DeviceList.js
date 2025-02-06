@@ -17,7 +17,7 @@ const DeviceList = ({ selectedType, onSelectDevice }) => {
   useEffect(() => {
     if (!selectedType) return;
 
-    axios.get(`http://localhost:5000/api/devices/${selectedType}`)
+    axios.get(`http://172.19.100.110:5000/api/devices/${selectedType}`)
       .then((res) => {
         setDevices(res.data);
         generateChartData(res.data);

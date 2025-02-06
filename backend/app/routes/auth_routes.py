@@ -1,7 +1,6 @@
 import json
 from flask import Blueprint, request, jsonify, session
 from flask_jwt_extended import create_access_token, unset_jwt_cookies,create_access_token, get_jwt, create_access_token, get_jwt_identity
-# from flask_bcrypt import Bcrypt,check_password_hash
 from datetime import datetime, timedelta, timezone
 from app.models.user import User
 from app.auth import register_user

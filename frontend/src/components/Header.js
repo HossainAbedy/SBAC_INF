@@ -9,7 +9,7 @@ function Header(props) {
     function logMeOut() {
         axios({
             method: "POST",
-            url: "http://127.0.0.1:5000/logout",
+            url: "http://172.19.100.110:5000/logout",
         })
         .then((response) => {
             props.token();

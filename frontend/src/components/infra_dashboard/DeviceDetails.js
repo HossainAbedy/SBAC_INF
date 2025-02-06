@@ -15,7 +15,7 @@ const DeviceDetails = ({ deviceId }) => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/device/details/${deviceId}`)
+      .get(`http://172.19.100.110:5000/api/device/details/${deviceId}`)
       .then((res) => setDetails(res.data))
       .catch((err) => console.error("Error fetching device details:", err));
   }, [deviceId]);

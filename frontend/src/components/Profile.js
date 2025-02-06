@@ -14,7 +14,7 @@ const Profile = ({ token, setToken }) => {
   const getUsers = () => {
     axios({
       method: "GET",
-      url: `http://127.0.0.1:5000/profile/${email}`,
+      url: `http://172.19.100.110:5000/profile/${email}`,
       headers: {
         Authorization: `Bearer ${token}`,
       },

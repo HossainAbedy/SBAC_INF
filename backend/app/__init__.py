@@ -29,9 +29,5 @@ def create_app():
     bcrypt.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
-    
-    # Register blueprints
-    # from app.routes.auth_routes import auth_routes
-    # app.register_blueprint(auth_routes)
 
     return app

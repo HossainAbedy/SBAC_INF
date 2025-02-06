@@ -21,11 +21,11 @@ const LocationManager = () => {
   
     useEffect(() => {
       filterLocations();
-    }, [searchTerm, locations]);
+    }, [searchTerm, locations,]);
   
     const fetchLocations = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/locations");
+        const res = await axios.get("http://172.19.100.110:5000/api/locations");
         setLocations(res.data);
       } catch (error) {
         console.error("Error fetching locations:", error);
@@ -53,10 +53,10 @@ const LocationManager = () => {
         const config = { headers: { Authorization: `Bearer ${token}` } };
   
         if (editingLocation) {
-          await axios.put(`http://localhost:5000/api/locations/${editingLocation.id}`, values, config);
+          await axios.put(`http://172.19.100.110:5000/api/locations/${editingLocation.id}`, values, config);
           toast.success("Location updated successfully!");
         } else {
-          await axios.post("http://localhost:5000/api/locations", values, config);
+          await axios.post("http://172.19.100.110:5000/api/locations", values, config);
           toast.success("Location added successfully!");
         }
   
@@ -74,7 +74,7 @@ const LocationManager = () => {
         const token = localStorage.getItem("token");
         const config = { headers: { Authorization: `Bearer ${token}` } };
   
-        await axios.delete(`http://localhost:5000/api/locations/${locationId}`, config);
+        await axios.delete(`http://172.19.100.110:5000/api/locations/${locationId}`, config);
         toast.success("Location deleted successfully!");
         fetchLocations();
       } catch (error) {

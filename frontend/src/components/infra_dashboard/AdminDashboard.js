@@ -43,7 +43,7 @@ const AdminDashboard = () => {
 
   // Fetch users
   const fetchUsers = () => {
-    axios.get("http://127.0.0.1:5000/users", {
+    axios.get("http://172.19.100.110:5000/users", {
       headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
     })
     .then(response => {
@@ -55,7 +55,7 @@ const AdminDashboard = () => {
   // Fetch devices based on filters
   const fetchDevices = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/devices/summaries", {
+      const res = await axios.get("http://172.19.100.110:5000/api/devices/summaries", {
         params: filters  // Apply filters to the API call
       });
       setDevices(res.data);
@@ -67,7 +67,7 @@ const AdminDashboard = () => {
   // Fetch locations
   const fetchLocations = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/locations", {
+      const res = await axios.get("http://172.19.100.110:5000/api/locations", {
         params: filters  // Apply filters to the API call
       });
       setLocations(res.data);
@@ -87,10 +87,10 @@ const AdminDashboard = () => {
         headers: { Authorization: `Bearer ${token}` }
       };
       if (editingDevice) {
-        await axios.put(`http://localhost:5000/api/device/${editingDevice.id}`, values, config);
+        await axios.put(`http://172.19.100.110:5000/api/device/${editingDevice.id}`, values, config);
         toast.success("Device updated successfully!");
       } else {
-        await axios.post("http://localhost:5000/api/device", values, config);
+        await axios.post("http://172.19.100.110:5000/api/device", values, config);
         toast.success("Device added successfully!");
       }
       fetchDevices();
@@ -111,7 +111,7 @@ const AdminDashboard = () => {
       const config = {
         headers: { Authorization: `Bearer ${token}` }
       };
-      await axios.delete(`http://localhost:5000/api/device/${deviceId}`, config);
+      await axios.delete(`http://172.19.100.110:5000/api/device/${deviceId}`, config);
       toast.success("Device deleted successfully!");
       fetchDevices();
     } catch (error) {

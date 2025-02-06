@@ -20,7 +20,7 @@ const Login = ({ setToken }) => {
     setError("");
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/logintoken", {
+      const response = await axios.post("http://172.19.100.110:5000/logintoken", {
         email: loginForm.email,
         password: loginForm.password
       });

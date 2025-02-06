@@ -215,6 +215,7 @@ const InfraDashboard = ({ onSelectType }) => {
                 cx="50%" // Shift left for better spacing
                 cy="50%"
                 outerRadius={100} // Increase for better visibility
+                fill="#8884d8"
                 label={({ value, x, y }) => (
                   <text x={x} y={y} textAnchor="middle" fontSize={16} fill={getRandomColor()}>
                     {value}

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { debounce } from "lodash";
-import { SearchOutlined } from "@ant-design/icons";
+// import { SearchOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
@@ -157,20 +157,20 @@ const AdminDashboard = () => {
       <Button 
         type="primary" 
         onClick={() => navigate("/location-manager")} 
-        style={{ marginLeft: 10 }} 
+        style={{ marginLeft: 10,marginRight: 10 }} 
         // disabled={loggedInUserRole === "user"}
       >
                       Manage Location
       </Button>
 
       {/* Search Inputs */}
-      <Input
+      {/* <Input
           placeholder="Search by anything"
           value={searchTerm}
           onChange={handleSearchTermChange}
           style={{ width: 300, marginLeft: 10 }}
           prefix={<SearchOutlined />}
-      />
+      /> */}
 
         <Input
           placeholder="Search by Name"
@@ -268,7 +268,7 @@ const AdminDashboard = () => {
           <Form.Item name="location_id" label="Location" rules={[{ required: true }]}>
             <Select>
               {locations.map((loc) => (
-                <Option key={loc.id} value={loc.name}>{loc.name}</Option>
+                <Option key={loc.id} value={loc.id}>{loc.name}</Option>
               ))}
             </Select>
           </Form.Item>

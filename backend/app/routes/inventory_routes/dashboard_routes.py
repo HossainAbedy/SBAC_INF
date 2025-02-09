@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from sqlalchemy.orm import joinedload
+from sqlalchemy.sql import func
 from app.models.inventory_models.device_details import DeviceDetails, db
 from app.models.inventory_models.device import Device
 from app.models.inventory_models.location import Location
@@ -28,16 +30,49 @@ def get_all_locations():
     # Return the result as JSON
     return jsonify(result)
 
+# @dashboard_routes.route('/api/devices/by-location', methods=['GET'])
+# def get_devices_by_location():
+#     location_summary = db.session.query(
+#         Location.name.label("location"),
+#         db.func.count(Device.id).label("count")
+#     ).join(Device, Device.location_id == Location.id) \
+#      .group_by(Location.name) \
+#      .all()
+    
+#     return jsonify([{ "location": loc, "count": count } for loc, count in location_summary])
+
 @dashboard_routes.route('/api/devices/by-location', methods=['GET'])
 def get_devices_by_location():
-    location_summary = db.session.query(
-        Location.name.label("location"),
-        db.func.count(Device.id).label("count")
-    ).join(Device, Device.location_id == Location.id) \
-     .group_by(Location.name) \
-     .all()
+    locations = db.session.query(
+        Location,
+        func.count(Device.id).label("count")
+    ).outerjoin(Device).group_by(Location.id).options(
+        joinedload(Location.devices).joinedload(Device.details)  # Load devices & their details
+    ).all()
 
-    return jsonify([{ "location": loc, "count": count } for loc, count in location_summary])    
+    return jsonify([
+    {
+        "location": location.name,  # Keep `location` as a string
+        "count": count,
+        "devices": [
+            {
+                "id": device.id,
+                "name": device.name,
+                "type": device.type,
+                "details": {
+                    "oem": device.details[0].oem if device.details else None,
+                    "serial_number": device.details[0].serial_number if device.details else None,
+                    "firmware_version": device.details[0].firmware_version if device.details else None,
+                    "installation_date": str(device.details[0].installation_date) if device.details else None,
+                    "bandwidth_usage": device.details[0].bandwidth_usage if device.details else None,
+                    "uptime": device.details[0].uptime if device.details else None,
+                } if device.details else None
+            } for device in location.devices
+        ]
+    }
+    for location, count in locations
+])
+
 
 @dashboard_routes.route('/api/devices/summaries', methods=['GET'])
 def get_device_summaries():

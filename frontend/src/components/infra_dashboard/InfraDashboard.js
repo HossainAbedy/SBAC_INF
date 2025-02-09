@@ -12,7 +12,26 @@ import {
 } from "@mui/material";
 
 // Define chart colors
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AF19FF"];
+const COLORS = [
+  // Original colors
+  "#FF4565", // Coral Red
+  "#00D0D6", // Cyan
+  "#00FF99", // Mint Green
+  "#FFBB28", // Yellow
+  "#FF8042", // Orange
+  
+  // New additions (10 vibrant colors)
+  "#0088FE", // Blue
+  "#00C49F", // Teal
+  "#A463F2", // Lavender
+  "#FF6E4A", // Salmon
+  "#7C4DFF", // Deep Blue
+  "#AF19FF", // Purple
+  "#FF55A3", // Pink
+  "#40E0D0", // Turquoise
+  "#FFA343", // Peach
+  "#9C27B0", // Dark Purple
+];
 
 const InfraDashboard = ({ onSelectType }) => {
   const [deviceSummary, setDeviceSummary] = useState([]);
@@ -28,6 +47,7 @@ const InfraDashboard = ({ onSelectType }) => {
       .then((res) => {
         setDeviceSummary(res.data);
         setFilteredDeviceSummary(res.data);
+        // console.log(res.data);
       })
       .catch((err) => console.error("Error fetching device summary:", err));
 
@@ -35,18 +55,33 @@ const InfraDashboard = ({ onSelectType }) => {
       .then((res) => {
         setLocationSummary(res.data);
         setFilteredLocationSummary(res.data);
+        // console.log(res.data);
       })
       .catch((err) => console.error("Error fetching devices by location:", err));
   }, []);
 
-  // Handle Device Type Filter
   const handleDeviceTypeChange = (event) => {
     const selectedType = event.target.value;
     setSelectedDeviceType(selectedType);
-    setFilteredDeviceSummary(
-      selectedType ? deviceSummary.filter((d) => d.type === selectedType) : deviceSummary
-    );
-  };
+
+    const filtered = (selectedLocation 
+        ? locationSummary.find(l => l.location === selectedLocation)?.devices || deviceSummary 
+        : deviceSummary
+    )
+    .filter(device => !selectedType || device.type === selectedType)
+    .reduce((acc, device) => {
+        const existing = acc.find(d => d.type === device.type);
+        if (existing) {
+            existing.count += device.count; // Accumulate count for the same type
+        } else {
+            acc.push({ type: device.type, count: device.count });
+        }
+        return acc;
+    }, []);
+    setFilteredDeviceSummary(filtered);
+};
+  
+
   // Filter Device data based on legend click
   const displayedDeviceData = selectedDeviceType
     ? filteredDeviceSummary.filter((entry) => entry.type === selectedDeviceType)
@@ -56,10 +91,40 @@ const InfraDashboard = ({ onSelectType }) => {
   const handleLocationChange = (event) => {
     const selectedLoc = event.target.value;
     setSelectedLocation(selectedLoc);
-    setFilteredLocationSummary(
-      selectedLoc ? locationSummary.filter((l) => l.location === selectedLoc) : locationSummary
-    );
+
+    if (!selectedLoc) {
+        setFilteredLocationSummary(locationSummary);
+        return;
+    }
+
+    const filteredLocations = locationSummary.filter(l => l.location === selectedLoc);
+
+    console.log("Filtered Locations:", filteredLocations);
+    filteredLocations.forEach(loc => {
+        console.log("Devices at", loc.location, ":", loc.devices);
+    });
+
+    // Aggregate device counts per type
+    const aggregatedDevices = filteredLocations
+        .flatMap(l => l.devices)
+        .reduce((acc, device) => {
+            const deviceType = device.type;
+
+            if (!acc[deviceType]) {
+                acc[deviceType] = { type: deviceType, count: 1 }; // Initialize count
+            } else {
+                acc[deviceType].count += 1; // Increment count
+            }
+            return acc;
+        }, {});
+
+    // Convert object to array
+    const deviceSummaryArray = Object.values(aggregatedDevices);
+
+    console.log("Final Aggregated Devices:", deviceSummaryArray);
+    setFilteredLocationSummary([{ location: selectedLoc, devices: deviceSummaryArray }]);
   };
+
   // Filter Location data based on legend click
   const displayedLocationData = selectedLocation
     ? filteredLocationSummary.filter((entry) => entry.location === selectedLocation)
@@ -100,8 +165,13 @@ const InfraDashboard = ({ onSelectType }) => {
 
       {/* Filters */}
       <Grid container spacing={3} sx={{ mb: 3, alignItems: "center" }}>
+        {/* Filter by Device Type */}
         <Grid item xs={12} sm={6} md={4}>
-          <FormControl fullWidth sx={{ bgcolor: "white", borderRadius: 2, boxShadow: 1 }}>
+          <FormControl 
+            fullWidth 
+            sx={{ bgcolor: "white", borderRadius: 2, boxShadow: 1 }}
+            disabled={!!selectedLocation} // Disable if a location is selected
+          >
             <InputLabel sx={{ fontSize: 14 }}>Filter by Device Type</InputLabel>
             <Select
               value={selectedDeviceType}
@@ -118,8 +188,13 @@ const InfraDashboard = ({ onSelectType }) => {
           </FormControl>
         </Grid>
 
+        {/* Filter by Location */}
         <Grid item xs={12} sm={6} md={4}>
-          <FormControl fullWidth sx={{ bgcolor: "white", borderRadius: 2, boxShadow: 1 }}>
+          <FormControl 
+            fullWidth 
+            sx={{ bgcolor: "white", borderRadius: 2, boxShadow: 1 }}
+            disabled={!!selectedDeviceType} // Disable if a device type is selected
+          >
             <InputLabel sx={{ fontSize: 14 }}>Filter by Location</InputLabel>
             <Select
               value={selectedLocation}
@@ -140,8 +215,8 @@ const InfraDashboard = ({ onSelectType }) => {
 
       {/* Device Type Cards */}
       <Grid container spacing={3} justifyContent="center">
-        {filteredDeviceSummary.map((device, index) => (
-          <Grid item key={device.type} xs={12} sm={6} md={4} lg={3}>
+        {(selectedLocation ? filteredLocationSummary[0]?.devices : filteredDeviceSummary).map((device, index) => (
+          <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
             <Card 
               sx={{ 
                 boxShadow: 3, 

@@ -16,12 +16,12 @@ const PieChartComponent = ({ title, data, dataKey, nameKey, onLegendClick, selec
         cx="50%" 
         cy="50%" 
         outerRadius={100}
-        fill="#8884d8"
-        label={({ value, x, y }) => (
-            <text x={x} y={y} textAnchor="middle" fontSize={16} fill={COLORS}>
-                {value}
-            </text>
-        )}
+        // fill="#8884d8"
+        // label={({ value, x, y }) => (
+        //     <text x={x} y={y} textAnchor="middle" fontSize={16} fill={COLORS}>
+        //         {value}
+        //     </text>
+        // )}
         // label={({ name, count }) => `${name} ${(percent * 100).toFixed(1)}%`}
         // label={({ name, count }) => `${name} ${count}`}
         >

@@ -6,9 +6,6 @@ app = create_app()
 
 # Register routes
 register_routes(app)
-
-# with app.app_context():
-#     db.create_all()
  
 @app.route("/")
 def hello_world():

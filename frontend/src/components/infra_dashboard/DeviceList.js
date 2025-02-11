@@ -26,6 +26,7 @@ import {
 } from "@mui/material";
 import { Pie, Bar } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from "chart.js";
+import { COLORS, getRandomColor } from "../utils/RandomColors"; // Import a function for random color generation
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
@@ -89,32 +90,6 @@ const DeviceList = ({ selectedType, onSelectDevice }) => {
     onSelectDevice(id);
     navigate(`/device/${id}`);
   };
-
-  const COLORS = [
-    // Original colors
-    "#0088FE", // Blue
-    "#00C49F", // Teal
-    "#FFBB28", // Yellow
-    "#FF8042", // Orange
-    "#AF19FF", // Purple
-  
-    // New additions (10 vibrant colors)
-    "#FF4565", // Coral Red
-    "#00D0D6", // Cyan
-    "#A463F2", // Lavender
-    "#FF6E4A", // Salmon
-    "#7C4DFF", // Deep Blue
-    "#00FF99", // Mint Green
-    "#FF55A3", // Pink
-    "#40E0D0", // Turquoise
-    "#FFA343", // Peach
-    "#9C27B0", // Dark Purple
-  ];
-
-  // const getDynamicColor = (id) => {
-  //   const hue = (id * 137) % 360; // Generate a unique color based on ID
-  //   return `hsl(${hue}, 70%, 80%)`; // Soft pastel colors
-  // };
 
   const getDynamicColor = () => {
     const randomIndex = Math.floor(Math.random() * COLORS.length);
@@ -184,8 +159,8 @@ const DeviceList = ({ selectedType, onSelectDevice }) => {
                     sx={{ objectFit: "contain", p: 1, backgroundColor: "#f8f9fa" }}
                   />
                   <CardContent>
-                    <Typography variant="subtitle2">{device.name}</Typography>
-                    <Typography variant="caption" color="textSecondary">{device.location}</Typography>
+                    <Typography variant="subtitle2" style={{ color: 'white' }}>{device.name}</Typography>
+                    <Typography variant="caption" color="textSecondary" style={{ color: 'white' }}>{device.location}</Typography>
                   </CardContent>
                 </CardActionArea>
               </Card>

@@ -19,7 +19,7 @@ def create_app():
     app = Flask(__name__)
 
     # Enable CORS for specific origins, including Socket.IO
-    CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
+    CORS(app, origins=["http://localhost:3000","http://172.19.100.110:3000"], supports_credentials=True)
 
     # Configure your app
     app.config.from_object('app.config.Config')
